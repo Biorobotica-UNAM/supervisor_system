@@ -7,9 +7,15 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(supervisor_interfaces)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -22,5 +28,40 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+add_executable(supervisor_system_node src/supervisor_system_node.cpp)
+
+target_include_directories(supervisor_system_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+  
+target_link_libraries(supervisor_system_node
+  ${rclcpp_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+ament_target_dependencies(supervisor_system_node
+  rclcpp
+  std_msgs
+  std_srvs
+  supervisor_interfaces
+)
+
+# Install executables
+install(TARGETS
+  supervisor_system_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install include directories
+#install(DIRECTORY include/
+#  DESTINATION include
+#)
+
+# Export dependencies
+ament_export_include_directories(include)
+ament_export_libraries(supervisor_plan_node)
+ament_export_dependencies(rclcpp std_msgs)
+
 
 ament_package()
